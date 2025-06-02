@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seasonal Travel Planner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .planner-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .season-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .season-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--season-color), var(--season-color-light));
+        }
+
+        .season-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+
+        .season-card.spring {
+            --season-color: #4CAF50;
+            --season-color-light: #81C784;
+        }
+
+        .season-card.summer {
+            --season-color: #FF9800;
+            --season-color-light: #FFB74D;
+        }
+
+        .season-card.autumn {
+            --season-color: #F44336;
+            --season-color-light: #E57373;
+        }
+
+        .season-card.winter {
+            --season-color: #2196F3;
+            --season-color-light: #64B5F6;
+        }
+
+        .season-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .season-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--season-color);
+        }
+
+        .season-description {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .destinations {
+            list-style: none;
+        }
+
+        .destinations li {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            margin: 5px 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--season-color);
+            transition: all 0.2s ease;
+        }
+
+        .destinations li:hover {
+            background: var(--season-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .travel-form {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .alert {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #51cf66;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .weather-widget {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .travel-form, .season-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌍 Seasonal Travel Planner</h1>
+            <p class="subtitle">Discover the perfect destinations for every season</p>
+        </header>
+
+        <div class="planner-grid">
+            <div class="season-card spring" onclick="selectSeason('spring')">
+                <span class="season-icon">🌸</span>
+                <h3 class="season-title">Spring Adventures</h3>
+                <p class="season-description">Witness nature's awakening with blooming flowers and mild temperatures.</p>
+                <ul class="destinations">
+                    <li>Japan - Cherry Blossoms</li>
+                    <li>Netherlands - Tulip Fields</li>
+                    <li>India - Pleasant Weather</li>
+                    <li>Turkey - Mild Climate</li>
+                </ul>
+            </div>
+
+            <div class="season-card summer" onclick="selectSeason('summer')">
+                <span class="season-icon">☀️</span>
+                <h3 class="season-title">Summer Escapes</h3>
+                <p class="season-description">Beach days, festivals, and endless sunshine await your adventures.</p>
+                <ul class="destinations">
+                    <li>Greece - Island Hopping</li>
+                    <li>Norway - Midnight Sun</li>
+                    <li>Canada - National Parks</li>
+                    <li>Scandinavia - White Nights</li>
+                </ul>
+            </div>
+
+            <div class="season-card autumn" onclick="selectSeason('autumn')">
+                <span class="season-icon">🍂</span>
+                <h3 class="season-title">Autumn Colors</h3>
+                <p class="season-description">Experience breathtaking fall foliage and harvest festivals.</p>
+                <ul class="destinations">
+                    <li>New England - Fall Foliage</li>
+                    <li>Germany - Oktoberfest</li>
+                    <li>South Korea - Autumn Leaves</li>
+                    <li>Morocco - Perfect Weather</li>
+                </ul>
+            </div>
+
+            <div class="season-card winter" onclick="selectSeason('winter')">
+                <span class="season-icon">❄️</span>
+                <h3 class="season-title">Winter Wonders</h3>
+                <p class="season-description">Embrace the magic of snow, winter sports, and cozy atmospheres.</p>
+                <ul class="destinations">
+                    <li>Switzerland - Ski Resorts</li>
+                    <li>Iceland - Northern Lights</li>
+                    <li>India - Cool Season</li>
+                    <li>Philippines - Dry Season</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="travel-form">
+            <h2>🎯 Plan Your Perfect Trip</h2>
+            <div id="alert" class="alert"></div>
+            <form id="travelForm">
+                <div class="form-group">
+                    <label for="season">Preferred Season:</label>
+                    <select id="season" required>
+                        <option value="">Select a season</option>
+                        <option value="spring">Spring (Mar-May)</option>
+                        <option value="summer">Summer (Jun-Aug)</option>
+                        <option value="autumn">Autumn (Sep-Nov)</option>
+                        <option value="winter">Winter (Dec-Feb)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="budget">Budget Range:</label>
+                    <select id="budget" required>
+                        <option value="">Select budget</option>
+                        <option value="budget">Budget (₹5,000 - ₹25,000)</option>
+                        <option value="mid">Mid-range (₹25,000 - ₹75,000)</option>
+                        <option value="luxury">Luxury (₹75,000+)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="interests">Travel Group Type:</label>
+                    <select id="interests" required>
+                        <option value="">Select travel type</option>
+                        <option value="solo">🚶‍♂️ Solo Travel</option>
+                        <option value="couples">💑 Couples</option>
+                        <option value="family">👨‍👩‍👧‍👦 Family</option>
+                        <option value="fun">🎉 Fun Group</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="duration">Trip Duration:</label>
+                    <select id="duration" required>
+                        <option value="">Select duration</option>
+                        <option value="weekend">Weekend (2-3 days)</option>
+                        <option value="week">One Week</option>
+                        <option value="extended">Extended (2+ weeks)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn">✨ Get My Travel Recommendations</button>
+            </form>
+        </div>
+
+        <div id="results" class="results">
+            <h2>🎉 Your Personalized Travel Recommendations</h2>
+            <div id="recommendations"></div>
+        </div>
+
+        <div class="weather-widget">
+            <h3>🌤️ Travel Tip of the Day</h3>
+            <p id="travelTip">Pack layers for unpredictable weather - you'll thank yourself later!</p>
+        </div>
+    </div>
+
+    <script>
+        // Travel data with destinations organized by season and budget
+        const travelData = {
+            spring: {
+                budget: [
+                    {name: 'Rishikesh', country: 'India', type: 'domestic'},
+                    {name: 'Mussoorie', country: 'India', type: 'domestic'},
+                    {name: 'Nainital', country: 'India', type: 'domestic'},
+                    {name: 'Coorg', country: 'India', type: 'domestic'},
+                    {name: 'Munnar', country: 'India', type: 'domestic'}
+                ],
+                mid: [
+                    {name: 'Kashmir', country: 'India', type: 'domestic'},
+                    {name: 'Darjeeling', country: 'India', type: 'domestic'},
+                    {name: 'Shimla', country: 'India', type: 'domestic'},
+                    {name: 'Nepal', country: 'Nepal', type: 'international'},
+                    {name: 'Bhutan', country: 'Bhutan', type: 'international'}
+                ],
+                luxury: [
+                    {name: 'Switzerland', country: 'Switzerland', type: 'international'},
+                    {name: 'Netherlands', country: 'Netherlands', type: 'international'},
+                    {name: 'Japan', country: 'Japan', type: 'international'}
+                ]
+            },
+            summer: {
+                budget: [
+                    {name: 'Manali', country: 'India', type: 'domestic'},
+                    {name: 'Leh-Ladakh', country: 'India', type: 'domestic'},
+                    {name: 'Mount Abu', country: 'India', type: 'domestic'},
+                    {name: 'Mahabaleshwar', country: 'India', type: 'domestic'},
+                    {name: 'Kodaikanal', country: 'India', type: 'domestic'}
+                ],
+                mid: [
+                    {name: 'Kashmir', country: 'India', type: 'domestic'},
+                    {name: 'Spiti Valley', country: 'India', type: 'domestic'},
+                    {name: 'Himachal Pradesh', country: 'India', type: 'domestic'},
+                    {name: 'Nepal', country: 'Nepal', type: 'international'},
+                    {name: 'Sri Lanka', country: 'Sri Lanka', type: 'international'}
+                ],
+                luxury: [
+                    {name: 'Norway', country: 'Norway', type: 'international'},
+                    {name: 'Iceland', country: 'Iceland', type: 'international'},
+                    {name: 'Canada', country: 'Canada', type: 'international'}
+                ]
+            },
+            autumn: {
+                budget: [
+                    {name: 'Agra', country: 'India', type: 'domestic'},
+                    {name: 'Jaipur', country: 'India', type: 'domestic'},
+                    {name: 'Udaipur', country: 'India', type: 'domestic'},
+                    {name: 'Jodhpur', country: 'India', type: 'domestic'},
+                    {name: 'Pushkar', country: 'India', type: 'domestic'}
+                ],
+                mid: [
+                    {name: 'Kerala', country: 'India', type: 'domestic'},
+                    {name: 'Goa', country: 'India', type: 'domestic'},
+                    {name: 'Hampi', country: 'India', type: 'domestic'},
+                    {name: 'Nepal', country: 'Nepal', type: 'international'},
+                    {name: 'Myanmar', country: 'Myanmar', type: 'international'}
+                ],
+                luxury: [
+                    {name: 'Japan', country: 'Japan', type: 'international'},
+                    {name: 'South Korea', country: 'South Korea', type: 'international'},
+                    {name: 'Germany', country: 'Germany', type: 'international'}
+                ]
+            },
+            winter: {
+                budget: [
+                    {name: 'Goa', country: 'India', type: 'domestic'},
+                    {name: 'Kerala', country: 'India', type: 'domestic'},
+                    {name: 'Pondicherry', country: 'India', type: 'domestic'},
+                    {name: 'Kanyakumari', country: 'India', type: 'domestic'},
+                    {name: 'Alleppey', country: 'India', type: 'domestic'}
+                ],
+                mid: [
+                    {name: 'Rajasthan', country: 'India', type: 'domestic'},
+                    {name: 'Gujarat', country: 'India', type: 'domestic'},
+                    {name: 'Tamil Nadu', country: 'India', type: 'domestic'},
+                    {name: 'Thailand', country: 'Thailand', type: 'international'},
+                    {name: 'Sri Lanka', country: 'Sri Lanka', type: 'international'}
+                ],
+                luxury: [
+                    {name: 'Maldives', country: 'Maldives', type: 'international'},
+                    {name: 'Dubai', country: 'UAE', type: 'international'},
+                    {name: 'Singapore', country: 'Singapore', type: 'international'}
+                ]
+            }
+        };
+
+        // Activities and recommendations based on travel group type
+        const groupActivities = {
+            solo: {
+                activities: ['Self-reflection walks', 'Photography', 'Local culture exploration', 'Meeting fellow travelers'],
+                tips: [
+                    'Share your itinerary with someone at home and check in regularly',
+                    'Stay in well-reviewed hostels or guesthouses in safe neighborhoods',
+                    'Keep emergency contacts saved in your phone and written down separately',
+                    'Trust your instincts - if something feels wrong, leave immediately',
+                    'Learn basic phrases: "Help", "Police", "Hospital" in the local language',
+                    'Avoid displaying expensive items like jewelry or high-end electronics',
+                    'Research local scams and common tourist traps beforehand',
+                    'Keep copies of important documents in cloud storage and separate bags',
+                    'Use official taxis or ride-sharing apps, avoid unmarked vehicles',
+                    'Stay connected: buy a local SIM card or international roaming plan',
+                    'Pack a portable charger and keep your phone charged at all times',
+                    'Join solo traveler groups on social media for destination-specific advice'
+                ]
+            },
+            couples: {
+                activities: ['Romantic dinners', 'Sunset viewing', 'Couple spa treatments', 'Private tours'],
+                tips: [
+                    'Book restaurants with romantic ambiance well in advance',
+                    'Plan one surprise activity for your partner during the trip',
+                    'Pack a portable Bluetooth speaker for romantic music moments',
+                    'Research couples spa packages and book early for better rates',
+                    'Bring or buy matching outfits for special photo opportunities',
+                    'Download a stargazing app to identify constellations together',
+                    'Book accommodations with balconies, ocean views, or private pools',
+                    'Create a shared photo album to collect memories throughout the trip',
+                    'Plan a mix of active adventures and relaxing intimate moments',
+                    'Research local couples activities like cooking classes or wine tastings',
+                    'Pack travel-sized games or cards for cozy evening entertainment',
+                    'Consider hiring a photographer for a professional couples shoot'
+                ]
+            },
+            family: {
+                activities: ['Kid-friendly attractions', 'Educational tours', 'Beach/park activities', 'Family restaurants'],
+                tips: [
+                    'Pack a first-aid kit with band-aids, children\'s medicine, and thermometer',
+                    'Research nearby hospitals and pediatric clinics at your destination',
+                    'Bring multiple entertainment options: tablets, coloring books, travel games',
+                    'Pack extra clothes, snacks, and wet wipes in your carry-on bag',
+                    'Book accommodations with kitchenettes to prepare familiar meals',
+                    'Plan activities in 2-3 hour blocks with breaks for naps or meals',
+                    'Bring familiar comfort items like favorite stuffed animals or blankets',
+                    'Research kid-friendly restaurants with high chairs and changing facilities',
+                    'Download offline maps and translation apps before departure',
+                    'Pack child-safe sunscreen, insect repellent, and any special medications',
+                    'Bring a stroller or baby carrier suitable for your destination\'s terrain',
+                    'Consider travel insurance that covers family medical emergencies',
+                    'Plan backup indoor activities in case of bad weather',
+                    'Bring extra phone chargers and portable batteries for devices'
+                ]
+            },
+            fun: {
+                activities: ['Nightlife exploration', 'Adventure sports', 'Group activities', 'Local festivals'],
+                tips: [
+                    'Designate a sober group member for each night out as the "safety coordinator"',
+                    'Create a group WhatsApp chat for easy communication and location sharing',
+                    'Book accommodations that allow groups and won\'t complain about noise',
+                    'Research local nightlife areas and safe transportation options back to hotel',
+                    'Set group spending limits and consider using group payment apps',
+                    'Plan group activities that accommodate different energy levels and interests',
+                    'Create a shared itinerary with everyone\'s contact information and emergency contacts',
+                    'Research local laws about alcohol, drugs, and public behavior to avoid trouble',
+                    'Book restaurants that can accommodate large groups with advance notice',
+                    'Consider hiring a local guide for group activities and cultural experiences',
+                    'Pack a group first-aid kit and ensure someone knows basic first aid',
+                    'Plan some downtime - not every moment needs to be action-packed',
+                    'Use buddy system for activities, especially water sports or hiking',
+                    'Research group discounts for attractions, tours, and transportation'
+                ]
+            }
+        };
+
+        // Travel tips array
+        const tips = [
+            "Pack layers for unpredictable weather - you'll thank yourself later!",
+            "Book accommodations early during peak seasons for better rates.",
+            "Research local customs and dress codes before traveling.",
+            "Download offline maps and translation apps before departure.",
+            "Pack a universal adapter and portable charger for electronics.",
+            "Keep digital and physical copies of important documents.",
+            "Try local transportation for authentic cultural experiences.",
+            "Learn a few basic phrases in the local language."
+        ];
+
+        // Function to select season when clicking on season cards
+        function selectSeason(season) {
+            document.getElementById('season').value = season;
+            showAlert('Season selected: ' + season.charAt(0).toUpperCase() + season.slice(1), 'success');
+        }
+
+        // Function to show alert messages
+        function showAlert(message, type = 'error') {
+            const alertDiv = document.getElementById('alert');
+            alertDiv.textContent = message;
+            alertDiv.className = 'alert' + (type === 'success' ? ' success' : '');
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Function to get season highlight
+        function getSeasonHighlight(season, destination) {
+            const highlights = {
+                spring: `Perfect weather for outdoor exploration in ${destination}`,
+                summer: `Peak season with long days and festivals in ${destination}`,
+                autumn: `Beautiful fall colors and harvest season in ${destination}`,
+                winter: `Ideal climate and fewer crowds in ${destination}`
+            };
+            return highlights[season];
+        }
+
+        // Function to get travel group emoji and description
+        function getTravelGroupInfo(groupType) {
+            const groupInfo = {
+                solo: { emoji: '🚶‍♂️', name: 'Solo Traveler' },
+                couples: { emoji: '💑', name: 'Couple' },
+                family: { emoji: '👨‍👩‍👧‍👦', name: 'Family' },
+                fun: { emoji: '🎉', name: 'Fun Group' }
+            };
+            return groupInfo[groupType];
+        }
+
+        // Main function to generate recommendations
+        function generateRecommendations(event) {
+            event.preventDefault();
+            
+            // Get form values
+            const season = document.getElementById('season').value;
+            const budget = document.getElementById('budget').value;
+            const interests = document.getElementById('interests').value;
+            const duration = document.getElementById('duration').value;
+
+            // Validate all fields are filled
+            if (!season || !budget || !interests || !duration) {
+                showAlert('Please fill in all fields to get your travel recommendations!');
+                return;
+            }
+
+            try {
+                // Get destinations and activities
+                const destinations = travelData[season][budget];
+                const groupInfo = getTravelGroupInfo(interests);
+                const recommendedActivities = groupActivities[interests].activities;
+                const groupTips = groupActivities[interests].tips;
+
+                if (!destinations || destinations.length === 0) {
+                    showAlert('Sorry, no destinations found for your selection. Please try different options.');
+                    return;
+                }
+
+                // Separate Indian and International destinations
+                const indianDestinations = destinations.filter(dest => dest.type === 'domestic');
+                const internationalDestinations = destinations.filter(dest => dest.type === 'international');
+
+                // Generate recommendations HTML
+                let recommendationsHTML = '';
+
+                // Show Indian destinations first
+                if (indianDestinations.length > 0) {
+                    recommendationsHTML += '<h3 style="color: #667eea; margin-bottom: 20px; display: flex; align-items: center;"><span style="margin-right: 10px;">🇮🇳</span>Indian Destinations</h3>';
+                    
+                    indianDestinations.slice(0, 3).forEach((destination, index) => {
+                        recommendationsHTML += `
+                            <div class="result-item">
+                                <div class="result-title">🏞️ ${destination.name}, ${destination.country}</div>
+                                <p><strong>Type:</strong> <span style="background: #e8f5e8; padding: 3px 8px; border-radius: 12px; color: #2d5016; font-size: 0.9em;">🏠 Domestic Travel</span></p>
+                                <p><strong>Perfect for:</strong> ${groupInfo.emoji} ${groupInfo.name} travelers</p>
+                                <p><strong>Duration:</strong> Perfect for a ${duration === 'weekend' ? 'weekend' : duration === 'week' ? 'week-long' : 'extended'} trip</p>
+                                <p><strong>Recommended activities:</strong> ${recommendedActivities.slice(0, 2).join(', ')}</p>
+                                <p><strong>Season highlight:</strong> ${getSeasonHighlight(season, destination.name)}</p>
+                                <p><strong>Travel tip:</strong> ${groupTips[index % groupTips.length]}</p>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Show International destinations
+                if (internationalDestinations.length > 0) {
+                    recommendationsHTML += '<h3 style="color: #667eea; margin: 30px 0 20px 0; display: flex; align-items: center;"><span style="margin-right: 10px;">🌍</span>International Destinations</h3>';
+                    
+                    internationalDestinations.slice(0, 2).forEach((destination, index) => {
+                        recommendationsHTML += `
+                            <div class="result-item">
+                                <div class="result-title">✈️ ${destination.name}, ${destination.country}</div>
+                                <p><strong>Type:</strong> <span style="background: #e8f4fd; padding: 3px 8px; border-radius: 12px; color: #1a365d; font-size: 0.9em;">🌍 International Travel</span></p>
+                                <p><strong>Perfect for:</strong> ${groupInfo.emoji} ${groupInfo.name} travelers</p>
+                                <p><strong>Duration:</strong> Perfect for a ${duration === 'weekend' ? 'weekend' : duration === 'week' ? 'week-long' : 'extended'} trip</p>
+                                <p><strong>Recommended activities:</strong> ${recommendedActivities.slice(2, 4).join(', ')}</p>
+                                <p><strong>Season highlight:</strong> ${getSeasonHighlight(season, destination.name)}</p>
+                                <p><strong>Travel tip:</strong> ${groupTips[(index + 2) % groupTips.length]}</p>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Add general tips for the travel group
+                recommendationsHTML += `
+                    <div style="background: #f0f8ff; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 5px solid #667eea;">
+                        <h4 style="color: #667eea; margin-bottom: 15px;">💡 Special Tips for ${groupInfo.emoji} ${groupInfo.name} Travel</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            ${groupTips.map(tip => `<li style="margin: 8px 0; padding-left: 20px; position: relative;">
+                                <span style="position: absolute; left: 0;">•</span>${tip}
+                            </li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+
+                // Display results
+                document.getElementById('recommendations').innerHTML = recommendationsHTML;
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+                
+                showAlert('Recommendations generated successfully!', 'success');
+
+            } catch (error) {
+                console.error('Error generating recommendations:', error);
+                showAlert('An error occurred while generating recommendations. Please try again.');
+            }
+        }
+
+        // Function to update travel tip
+        function updateTravelTip() {
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+            document.getElementById('travelTip').textContent = randomTip;
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add form submit event listener
+            document.getElementById('travelForm').addEventListener('submit', generateRecommendations);
+            
+            // Update tip every 10 seconds
+            setInterval(updateTravelTip, 10000);
+            
+            // Add hover effects to season cards
+            document.querySelectorAll('.season-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
